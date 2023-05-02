@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bebrolet</title>
+    <style> 
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body { 
+        background: black;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      p {
+        color: white;
+        size: 10px;
+      }
+      a:link {
+        text-decoration: none;
+        color: white;
+      }
+      a:visited {
+        text-decoration: none;
+        color: white;
+      }
+      canvas {
+        border: 1px solid white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p>Welcome to Bebrolet 0.1!
+    <p>Arrows to move, Space to fire
+    <br>
+    <canvas width="400" height="400" id="game"></canvas>
+    <br>
+    <canvas width="200" height="20" id="ammo"></canvas>
+    <br>
+    <a href="ver0.2.html">Click to switch to Arcasha bebrolet</a>
+    <script>
+      var canvas = document.getElementById('game');
+      var context = canvas.getContext('2d');
+      var ammo_canvas = document.getElementById('ammo');
+      var ammo_context = ammo_canvas.getContext('2d');
+      ammo_context.fillStyle = 'orange';
+      var size = 10;
+      var max_ammo = 10;
+      var frame_count = 0;
+      var obj = {
+        x: 5,
+        y: 5,
+        dx: size,
+        dy: 0,
+        ammo_count: max_ammo
+      };
+      var bullets_arr = [];
+      function draw() {
+        requestAnimationFrame(draw);
+        if (++frame_count < 15) {
+          return;
+        }
+        frame_count = 0;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        show_ammo_capacity();
+        move_bebrolet();
+        bullets_arr.forEach(move_bullets);
+      }
+
+      function move_bebrolet() {
+        obj.x += obj.dx;
+        obj.y += obj.dy;
+        if (obj.x < 0) {
+          obj.x = canvas.width - size;
+        } else if (obj.x >= canvas.width) {
+          obj.x = 0;
+        }
+        if (obj.y < 0) {
+          obj.y = canvas.height - size;
+        } else if (obj.y >= canvas.height) {
+          obj.y = 0;
+        }
+        context.fillStyle = 'red';
+        context.fillRect(obj.x, obj.y, size, size);
+      }
+
+      function move_bullets(item) {
+        item.x += item.dx * 2;
+        item.y += item.dy * 2;
+        if (item.x < 0 || item.y < 0 || item.x > canvas.width || item.y > canvas.height) {
+          bullets_arr.splice(bullets_arr.indexOf(item), 1);
+          return;
+        }
+        context.fillStyle = 'green';
+        context.beginPath();
+        context.arc(item.x, item.y, size / 4, 0, 2 * Math.PI);
+        context.fill();
+      }
+
+      function show_ammo_capacity() {
+        ammo_context.clearRect(0, 0, 200, 20);
+        let bullet_width = ammo_canvas.width/max_ammo;
+        if (obj.ammo_count > 0) {
+          for (let i = 0; i < obj.ammo_count; i++) {
+            ammo_context.fillRect(i * bullet_width + 1, 2, bullet_width - 2, ammo_canvas.height - 5);
+          }
+        } else if ((max_ammo + obj.ammo_count) > 0) {
+          ammo_context.fillStyle = 'yellow';
+          ammo_context.fillRect(1, 2, ammo_canvas.width - bullet_width * (max_ammo + obj.ammo_count), ammo_canvas.height - 5);
+          obj.ammo_count--;
+        } else {
+          obj.ammo_count = max_ammo;
+          show_ammo_capacity();
+          ammo_context.fillStyle = 'orange';
+        }
+      }
+
+      document.addEventListener('keydown', function (e) {
+        if (e.which == 32) {
+          if (obj.ammo_count > 0) {
+            var bullet = {
+              x: obj.x + size / 2,
+              y: obj.y + size / 2,
+              dx: obj.dx,
+              dy: obj.dy,
+              speed: 5
+            };
+            obj.ammo_count--;
+          bullets_arr.push(bullet);
+          }
+        } else if (e.which == 37) {
+          obj.dx = -size;
+          obj.dy = 0;
+        } else if (e.which == 38) {
+          obj.dy = -size;
+          obj.dx = 0;
+        } else if (e.which == 39) {
+          obj.dx = size;
+          obj.dy = 0;
+        } else if (e.which == 40) {
+          obj.dy = size;
+          obj.dx = 0;
+        }
+      });
+      requestAnimationFrame(draw);
+    </script>
+  </body>
+</html>
